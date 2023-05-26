@@ -1,0 +1,50 @@
+pip install numpy pandas scikit-learn tensorflow
+# Import the necessary libraries
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_boston
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import tensorflow as tf
+from tensorflow.keras import layers
+
+# Load the Boston Housing dataset
+boston = load_boston()
+data = pd.DataFrame(boston.data, columns=boston.feature_names)
+data['PRICE'] = boston.target
+
+# Split the data into features and target
+X = data.drop('PRICE', axis=1).values
+y = data['PRICE'].values
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale the features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create the Deep Neural Network model
+model = tf.keras.Sequential([
+    layers.Dense(64, activation='relu', input_shape=[X_train.shape[1]]),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(1)
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='mean_squared_error')
+
+# Train the model
+model.fit(X_train_scaled, y_train, epochs=100, batch_size=32, verbose=0)
+
+# Evaluate the model
+loss = model.evaluate(X_test_scaled, y_test, verbose=0)
+print(f'Test Loss: {loss:.4f}')
+
+# Make predictions
+predictions = model.predict(X_test_scaled)
+
+# Display some predictions
+for i in range(10):
+    print(f'True Price: {y_test[i]}, Predicted Price: {predictions[i][0]:.2f}')

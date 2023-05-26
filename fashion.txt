@@ -1,0 +1,40 @@
+# Import the necessary libraries
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.datasets import fashion_mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPooling2D
+
+# Load the MNIST Fashion Dataset
+(X_train, y_train), (X_test, y_test) = fashion_mnist.load_data()
+
+# Preprocess the data
+X_train = X_train / 255.0
+X_test = X_test / 255.0
+
+# Reshape the data to add the channel dimension (for grayscale images)
+X_train = np.expand_dims(X_train, axis=-1)
+X_test = np.expand_dims(X_test, axis=-1)
+
+# Create the model
+model = Sequential([
+    Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+    MaxPooling2D((2, 2)),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D((2, 2)),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dense(10, activation='softmax')
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_test, y_test))
+
+# Evaluate the model
+loss, accuracy = model.evaluate(X_test, y_test, verbose=0)
+print(f'Test Loss: {loss:.4f}')
+print(f'Test Accuracy: {accuracy:.4f}')
